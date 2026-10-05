@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import * as G from './groups'
 
 const PHOTO_MIME = 'application/x-imageplayer-photos'
@@ -18,6 +18,7 @@ function GroupNode({
   canMove,
   expanded,
   toggleExpanded,
+  counts,
 }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(group.name)
@@ -26,7 +27,7 @@ function GroupNode({
   const children = G.childrenOf(groups, group.id)
   const isOpen = expanded.has(group.id)
   const directCount = group.photoIds.length
-  const totalCount = G.collectPhotoIds(groups, group.id, true).length
+  const totalCount = counts.get(group.id) ?? 0
 
   const commitRename = () => {
     setEditing(false)
@@ -180,6 +181,7 @@ function GroupNode({
               canMove={canMove}
               expanded={expanded}
               toggleExpanded={toggleExpanded}
+              counts={counts}
             />
           ))}
         </ul>
@@ -223,6 +225,12 @@ export default function GroupTree({
   }
 
   const roots = G.childrenOf(groups, null)
+  // Photo counts (incl. sub-collections) once per change, not per row per render.
+  const counts = useMemo(() => {
+    const m = new Map()
+    for (const id of Object.keys(groups)) m.set(id, G.collectPhotoIds(groups, id, true).length)
+    return m
+  }, [groups])
 
   return (
     <div className={embedded ? 'tree tree-embedded' : 'tree'}>
@@ -276,6 +284,7 @@ export default function GroupTree({
                 canMove={canMove}
                 expanded={expanded}
                 toggleExpanded={toggleExpanded}
+                counts={counts}
               />
             ))}
           </ul>

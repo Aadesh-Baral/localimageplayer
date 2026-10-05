@@ -1,4 +1,4 @@
-# Image Player
+# Local Image Player
 
 Organise photos from shared Google Drive folders and local folders into
 **projects**, curate them into nested collections, and play them full screen —

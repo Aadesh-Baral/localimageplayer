@@ -157,3 +157,55 @@ export function readLegacy() {
     return null
   }
 }
+
+// ---- export / import ---------------------------------------------------------
+
+export const EXPORT_FORMAT = 'imageplayer-project'
+const MAX_IMPORT_BYTES = 4 * 1024 * 1024
+
+/** A self-describing JSON file for one project (links, folders, collections). */
+export function exportProject(project) {
+  const p = sanitizeProject(project)
+  const payload = {
+    format: EXPORT_FORMAT,
+    version: VERSION,
+    exportedAt: new Date().toISOString(),
+    project: {
+      name: p.name,
+      createdAt: p.createdAt,
+      sources: p.sources,
+      collections: p.collections,
+    },
+  }
+  const stamp = new Date().toISOString().slice(0, 10)
+  const safe = p.name.replace(/[/\\:*?"<>|\u0000-\u001f]/g, '_').trim() || 'project'
+  return {
+    filename: `${safe} - Image Player project ${stamp}.json`,
+    blob: new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }),
+  }
+}
+
+/**
+ * Read an exported file back. Accepts our export format or a bare project
+ * object. Returns { name, sources, collections } — never the old id, so an
+ * import always becomes a new project and can't overwrite an existing one.
+ */
+export async function readProjectFile(file) {
+  if (!file) throw new Error('No file chosen.')
+  if (file.size > MAX_IMPORT_BYTES) throw new Error('That file is too large to be a project export.')
+  let data
+  try {
+    data = JSON.parse(await file.text())
+  } catch {
+    throw new Error('That file isn’t valid JSON.')
+  }
+  const raw = data?.format === EXPORT_FORMAT ? data.project : data
+  if (data?.format && data.format !== EXPORT_FORMAT)
+    throw new Error('That JSON file isn’t an Image Player project export.')
+  if (!raw || typeof raw !== 'object' || (!raw.sources && !raw.collections))
+    throw new Error('No project found in that file.')
+  if (data?.version > VERSION)
+    throw new Error('This file was exported by a newer version of Image Player.')
+  const p = sanitizeProject({ ...raw, id: 'import' })
+  return { name: p.name, sources: p.sources, collections: p.collections }
+}

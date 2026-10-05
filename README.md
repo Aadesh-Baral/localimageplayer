@@ -24,6 +24,15 @@ copies the old browser-only folders and groups into a new project (the old data
 is left in place as a backup). Changes save automatically; the indicator next
 to the menu shows *Saving… / Saved*, and turns red with a retry if a save fails.
 
+### Export / import
+
+**⋯ → Export project (.json)** saves the project's metadata — Drive links,
+local folder paths, and all collections — to a file. **⋯ → Import project…**
+(or the link on the welcome screen) turns such a file into a **new** project;
+it never overwrites an existing one. Photos themselves aren't in the file,
+only references. Local folders have to be chosen again after importing
+(**Choose folder…** on each), since folder access is per browser.
+
 ## Local folders
 
 **+ Local folder…** uses Chrome/Edge's folder picker. Browsers never expose real

@@ -12,6 +12,8 @@ export default function ProjectBar({
   projectsApi,
   onNewProject,
   onImport,
+  onExportProject,
+  onImportProject,
   onApiKey,
   hasLegacy,
   auth,
@@ -71,9 +73,17 @@ export default function ProjectBar({
             <button className="menu-item" onClick={rename}>
               Rename project…
             </button>
-            <button className="menu-item" onClick={() => (setMenu(false), onImport())}>
-              Import from browser storage{hasLegacy ? '' : ' (nothing found)'}
+            <button className="menu-item" onClick={() => (setMenu(false), onExportProject())}>
+              Export project (.json)
             </button>
+            <button className="menu-item" onClick={() => (setMenu(false), onImportProject())}>
+              Import project…
+            </button>
+            {hasLegacy && (
+              <button className="menu-item" onClick={() => (setMenu(false), onImport())}>
+                Import from old browser storage
+              </button>
+            )}
             <button className="menu-item" onClick={() => (setMenu(false), onApiKey())}>
               Google API key (optional)…
             </button>

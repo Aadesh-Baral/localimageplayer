@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Workspace from './Workspace'
 import useDownloads from './useDownloads'
 import useProjects from './useProjects'
-import { readLegacy, LEGACY_IMPORTED } from './project'
+import { readLegacy, LEGACY_IMPORTED, exportProject, readProjectFile } from './project'
 import { useGoogleAuth, CLIENT_ID } from './googleAuth'
 
 const KEY_STORE = 'imageplayer.apiKey'
@@ -186,6 +186,49 @@ function Main({ auth }) {
     }
   }, [key, projectsApi])
 
+  /** Save the open project's metadata as a .json file. */
+  const exportCurrent = useCallback(() => {
+    const p = projectsApi.current
+    if (!p) return
+    const { filename, blob } = exportProject(p)
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 30_000)
+  }, [projectsApi])
+
+  /** Pick an exported .json and create a NEW project from it (never overwrites). */
+  const importFile = useCallback(() => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json,application/json'
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+      setError(null)
+      try {
+        const data = await readProjectFile(file)
+        const taken = new Set((projectsApi.list || []).map((p) => p.name))
+        let name = data.name
+        if (taken.has(name)) name = `${name} (imported)`
+        await projectsApi.create(name, { sources: data.sources, collections: data.collections })
+        const locals = data.sources.local.length
+        window.alert(
+          `Imported “${name}”: ${data.sources.gdrive.length} Drive link(s), ${locals} local folder(s), ${Object.keys(data.collections).length} collection(s).` +
+            (locals ? '\n\nLocal folders need to be chosen again on this computer — use “Choose folder…” on each.' : '')
+        )
+      } catch (e) {
+        setError(`Import failed: ${e.message}`)
+        window.alert(`Import failed: ${e.message}`)
+      }
+    }
+    input.click()
+  }, [projectsApi])
+
   const editApiKey = useCallback(() => {
     const next = window.prompt(
       'Optional Google API key — only used when you’re not signed in (stored in this browser only):',
@@ -260,6 +303,13 @@ function Main({ auth }) {
             </div>
           )}
 
+          <p className="help-note">
+            Have an exported project file?{' '}
+            <button className="link-btn" onClick={importFile}>
+              Import project…
+            </button>
+          </p>
+
           {error && <p className="error">{error}</p>}
           <p className="help-note">
             Signed in as {auth.user?.email}.{' '}
@@ -283,6 +333,8 @@ function Main({ auth }) {
         onDownload={startDownload}
         onNewProject={() => newProject()}
         onImport={importLegacy}
+        onExportProject={exportCurrent}
+        onImportProject={importFile}
         onApiKey={editApiKey}
         hasLegacy={!!legacy}
         auth={auth}

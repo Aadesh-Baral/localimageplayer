@@ -20,6 +20,8 @@ export default function Workspace({
   onDownload,
   onNewProject,
   onImport,
+  onExportProject,
+  onImportProject,
   onApiKey,
   hasLegacy,
   auth,
@@ -163,6 +165,8 @@ export default function Workspace({
         onDeleteGroup={deleteGroup}
         onNewProject={onNewProject}
         onImport={onImport}
+        onExportProject={onExportProject}
+        onImportProject={onImportProject}
         onApiKey={onApiKey}
         hasLegacy={hasLegacy}
         auth={auth}

@@ -40,6 +40,8 @@ export default function Sidebar({
   onDeleteGroup,
   onNewProject,
   onImport,
+  onExportProject,
+  onImportProject,
   onApiKey,
   hasLegacy,
   auth,
@@ -64,6 +66,8 @@ export default function Sidebar({
             projectsApi={projectsApi}
             onNewProject={onNewProject}
             onImport={onImport}
+            onExportProject={onExportProject}
+            onImportProject={onImportProject}
             onApiKey={onApiKey}
             hasLegacy={hasLegacy}
             auth={auth}

@@ -8,12 +8,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
-const SCOPES = [
-  'openid',
-  'email',
-  'profile',
-  'https://www.googleapis.com/auth/drive.readonly',
-].join(' ')
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly'
+const BASE_SCOPES = 'openid email profile'
+const SCOPES = `${BASE_SCOPES} ${DRIVE_SCOPE}`
 const SESSION = 'imageplayer.googleSession' // sessionStorage: survives reloads, not tab close
 
 // ---- module-level token, readable from non-React code (api.js, drive.js) ---
@@ -68,7 +65,9 @@ function loadGis() {
 /**
  * status: misconfigured | loading | signed-out | signed-in | expired
  */
-export function useGoogleAuth() {
+/** `drive: false` — identity only (people viewing a shared collection). */
+export function useGoogleAuth({ drive = true } = {}) {
+  const scope = drive ? SCOPES : BASE_SCOPES
   const [session, setSession] = useState(current)
   const [ready, setReady] = useState(false)
   const [error, setError] = useState(null)
@@ -88,7 +87,7 @@ export function useGoogleAuth() {
         if (!alive) return
         clientRef.current = window.google.accounts.oauth2.initTokenClient({
           client_id: CLIENT_ID,
-          scope: SCOPES,
+          scope,
           callback: async (resp) => {
             const done = pending.current
             pending.current = null
@@ -97,7 +96,7 @@ export function useGoogleAuth() {
               done?.reject(new Error(resp.error))
               return
             }
-            if (!window.google.accounts.oauth2.hasGrantedAllScopes(resp, ...SCOPES.split(' ').slice(3))) {
+            if (drive && !window.google.accounts.oauth2.hasGrantedAllScopes(resp, DRIVE_SCOPE)) {
               setError('Drive access wasn’t granted — tick the Google Drive box so photos can load.')
             }
             try {

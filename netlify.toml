@@ -28,3 +28,10 @@
   for = "/api/*"
   [headers.values]
     Cache-Control = "no-store"
+
+# Shared-collection pages are private links — keep them out of search engines.
+[[headers]]
+  for = "/s/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"

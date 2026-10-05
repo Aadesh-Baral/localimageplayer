@@ -33,6 +33,25 @@ it never overwrites an existing one. Photos themselves aren't in the file,
 only references. Local folders have to be chosen again after importing
 (**Choose folder…** on each), since folder access is per browser.
 
+### Sharing a collection
+
+Open a collection and click **Share…** to create a view-only link
+(`https://<site>/s/<random id>`). Each link is either:
+
+- **Anyone with the link** — no sign-in, or
+- **Only these Google accounts** — viewers sign in with Google (name + email
+  only, no Drive access) and must be on the link's list. While the OAuth app
+  is in *Testing* mode, those people must also be added as test users.
+
+Links are **live**: viewers always see the collection and its
+sub-collections as they are now. Viewers can browse and play the slideshow
+but can't edit or download. Only **Drive** photos are shared — local-folder
+photos are left out — and Drive folders must be shared as *Anyone with the
+link* for viewers to see the images (the dialog warns when one isn't). Revoke
+a link, delete the collection, or delete the project to end access.
+`ALLOWED_EMAILS` only controls who can *use the app*; people you share with
+don't need to be on it.
+
 ## Local folders
 
 **+ Local folder…** uses Chrome/Edge's folder picker. Browsers never expose real
@@ -96,6 +115,10 @@ no password). Nothing is lost meanwhile — saves wait and retry.
 - The Google token (Drive read-only) lives in `sessionStorage` for the tab and
   expires after ~1 hour. Revoked tokens may keep working against the API for
   up to 5 minutes (verification cache).
+- Share links are 144-bit random tokens. The public view returns only the
+  collection title and Drive file IDs — no folder links, local paths, other
+  collections or owner details. Account-restricted links verify the viewer's
+  Google token the same way as the API.
 - Run `pnpm audit` before deploying and after dependency updates.
 
 Projects are stored in the `imageplayer-projects` blob store under each

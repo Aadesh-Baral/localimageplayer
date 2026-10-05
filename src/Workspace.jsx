@@ -196,6 +196,9 @@ export default function Workspace({
           <Collections
             key={view.id}
             groupId={view.id}
+            projectId={project.id}
+            apiKey={apiKey}
+            flushProject={projectsApi.flush}
             byId={byId}
             sourceOf={sourceOf}
             groupsApi={groupsApi}

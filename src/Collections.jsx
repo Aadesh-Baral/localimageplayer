@@ -4,10 +4,14 @@ import SelectionBar from './SelectionBar'
 import useSelection from './useSelection'
 import * as G from './groups'
 import { parseKey, VENDOR_LABEL } from './project'
+import ShareDialog from './ShareDialog'
 
 /** One collection's photos (the tree itself lives in the sidebar). */
 export default function Collections({
   groupId,
+  projectId,
+  apiKey,
+  flushProject,
   byId,
   sourceOf,
   groupsApi,
@@ -16,6 +20,7 @@ export default function Collections({
 }) {
   const { groups } = groupsApi
   const [includeSubgroups, setIncludeSubgroups] = useState(true)
+  const [sharing, setSharing] = useState(false)
   const group = groupId ? groups[groupId] : null
 
   // Collection → vendor → link/path → photos, mirroring how it's saved.
@@ -139,6 +144,9 @@ export default function Collections({
                 >
                   Download collection
                 </button>
+                <button className="btn" onClick={() => setSharing(true)} title="Share a view-only link">
+                  Share…
+                </button>
               </div>
             </div>
 
@@ -212,6 +220,16 @@ export default function Collections({
             />
           </>
         )}
+      {sharing && group && (
+        <ShareDialog
+          projectId={projectId}
+          group={group}
+          blocks={blocks}
+          apiKey={apiKey}
+          flushProject={flushProject}
+          onClose={() => setSharing(false)}
+        />
+      )}
       </div>
   )
 }

@@ -7,7 +7,7 @@ import ViewerGroupMenu from './ViewerGroupMenu'
 
 const INTERVALS = [2, 3, 5, 8, 15, 30]
 
-export default function Viewer({ images, startIndex = 0, groupsApi, onExit }) {
+export default function Viewer({ images, startIndex = 0, groupsApi, onExit, exitLabel = '← Library' }) {
   const [order, setOrder] = useState(() => images.map((_, i) => i))
   const [pos, setPos] = useState(() =>
     Math.min(Math.max(0, startIndex), Math.max(0, images.length - 1))
@@ -262,8 +262,8 @@ export default function Viewer({ images, startIndex = 0, groupsApi, onExit }) {
       </button>
 
       <div className="topbar">
-        <button className="chip" onClick={onExit} title="Back to setup (Esc)">
-          ← Library
+        <button className="chip" onClick={onExit} title="Back (Esc)">
+          {exitLabel}
         </button>
         <span className="filename" title={current.name}>
           {current.name}

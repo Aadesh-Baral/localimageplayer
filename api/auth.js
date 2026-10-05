@@ -56,6 +56,11 @@ export async function verifyRequest(authorization, { clientId, allowed, requireA
   return checkAllowed(user, allowed)
 }
 
+/** For share viewers: right app + verified email, but NOT ALLOWED_EMAILS (the share has its own list). */
+export function viewerConfig(env) {
+  return { ...authConfig(env), allowed: [], requireAllowlist: false }
+}
+
 function checkAllowed(user, allowed) {
   if (allowed.length && !allowed.includes(user.email))
     throw new AuthError(403, `${user.email} isn’t allowed to use this Image Player.`)
